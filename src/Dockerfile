@@ -1,44 +1,24 @@
-#
-# Dockerfile for WordPress
-#
-FROM appsvcorg/nginx-fpm:php7.3.4-redis
-# ========
-# ENV vars
-# ========
-# ssh
+FROM wordpress:php8.3
 
-ENV SUPERVISOR_LOG_DIR "/var/log/supervisor"
+# Install NGINX, openssh-server, and supervisor
+RUN apt-get update && \
+    apt-get install -y nginx openssh-server supervisor && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-ENV SSH_PASSWD "root:Docker!"
-ENV SSH_PORT 2222
-#nginx
-ENV NGINX_LOG_DIR "/var/log/nginx"
-#php
-ENV PHP_HOME "/usr/local/etc/php"
-ENV PHP_CONF_DIR $PHP_HOME
-ENV PHP_CONF_FILE $PHP_CONF_DIR"/php.ini"
-# wordpress
-ENV WORDPRESS_SOURCE "/usr/src/wordpress"
-ENV WORDPRESS_HOME "/home/site/wwwroot"
-#
-ENV DOCKER_BUILD_HOME "/dockerbuild"
-# ====================
-# ====================
-# wordpress
-COPY wp-config.php $WORDPRESS_SOURCE/
-# supervisor
-COPY supervisord.conf /etc/
-# php
-COPY uploads.ini /usr/local/etc/php/conf.d/
-# nginx
+# Configure NGINX
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# override nginx config
-COPY nginx_conf/nginx.conf /etc/nginx/nginx.conf
-COPY nginx_conf/default.conf /etc/nginx/conf.d/default.conf
-COPY nginx_conf/spec-settings.conf /etc/nginx/conf.d/spec-settings.conf
+# Configure SSH
+RUN mkdir /var/run/sshd && echo 'root:Docker!' | chpasswd
 
-#
-COPY local_bin/. /usr/local/bin/
-RUN chmod -R +x /usr/local/bin
-EXPOSE $SSH_PORT 80
-ENTRYPOINT ["entrypoint.sh"]
+COPY sshd_config /etc/ssh/
+
+# Configure Supervisor
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose ports
+EXPOSE 80 443 2222
+
+# Launch Supervisor
+CMD ["/usr/bin/supervisord"]
