@@ -78,7 +78,7 @@ jobs:
         with:
           context: ./src
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.version.outputs.image_version }}
+          tags: ${{ env.REGISTRY }}/${{ steps.version.outputs.image_version }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
