@@ -7,7 +7,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Configure NGINX
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx_conf/nginx.conf /etc/nginx/nginx.conf
+COPY nginx_conf/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx_conf/spec-settings.conf /etc/nginx/conf.d/spec-settings.conf
 
 # Configure SSH
 RUN mkdir /var/run/sshd && echo 'root:Docker!' | chpasswd
