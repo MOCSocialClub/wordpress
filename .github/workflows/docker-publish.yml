@@ -65,7 +65,7 @@ jobs:
         run: |
           VERSION=$(cat src/version.txt)
           echo $VERSION
-          echo "image_version=kpantos/wordpress-alpine-php:$VERSION" >> $GITHUB_OUTPUT
+          echo "image_version=mocsocialclub/wordpress:$VERSION" >> $GITHUB_OUTPUT
         shell: bash
       
       - run: echo ${{ steps.version.outputs.image_version }}
@@ -78,7 +78,7 @@ jobs:
         with:
           context: ./src
           push: ${{ github.event_name != 'pull_request' }}
-          tags: kpantos/wordpress-alpine-php:latest,${{ steps.version.outputs.image_version }}
+          tags: ${{ steps.version.outputs.image_version }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
